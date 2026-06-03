@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { AVATAR, myPostTarget, type AvatarModel, type MyPost, type PostModel } from '../lib/model'
 
 export interface Viewable {
+  id: string
   seed: number
   age: number
   caption: string
@@ -10,6 +11,8 @@ export interface Viewable {
 
 type Common = {
   register: (id: string, el: HTMLElement | null) => void
+  /** whether this post has been opened (removes the "new" dashed ring) */
+  seen?: boolean
 }
 
 interface AvatarProps extends Common {
@@ -67,10 +70,16 @@ export default function Bubble(props: Props) {
   const seed = props.data.seed
   const old = props.kind === 'post' && props.data.age >= 5
 
+  // "new" dashed ring on your "+" posts and on fresh seeded posts (age < 2d),
+  // until the post is opened (seen).
+  const baseFresh = isMine || (props.kind === 'post' && props.data.age < 2)
+  const fresh = baseFresh && !props.seen
+
   const className =
     'bubble' +
     (isAvatar ? ' avatar' : ' photo') +
-    (isMine ? ' mypost fresh' : '') +
+    (isMine ? ' mypost' : '') +
+    (fresh ? ' fresh' : '') +
     (old ? ' old' : '')
 
   // Faithful timeline: avatars fly then size-pop (unfold) a beat later; circle
@@ -92,8 +101,8 @@ export default function Bubble(props: Props) {
         }
 
   const open = () => {
-    if (props.kind === 'post') props.onOpen({ seed: props.data.seed, age: props.data.age, caption: props.data.caption })
-    else if (props.kind === 'mypost') props.onOpen({ seed: props.data.seed, age: 0, caption: props.data.caption })
+    if (props.kind === 'post') props.onOpen({ id: props.data.id, seed: props.data.seed, age: props.data.age, caption: props.data.caption })
+    else if (props.kind === 'mypost') props.onOpen({ id: props.data.id, seed: props.data.seed, age: 0, caption: props.data.caption })
   }
 
   return (

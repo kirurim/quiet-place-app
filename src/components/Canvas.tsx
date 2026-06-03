@@ -20,6 +20,7 @@ interface Props {
   myPosts: MyPost[]
   panX: MotionValue<number>
   panY: MotionValue<number>
+  seen: Set<string>
   onOpen: (post: Viewable) => void
   onAddClick: () => void
   onPanStart: () => void
@@ -30,7 +31,7 @@ interface Props {
  * the center "+", goo and bubble clusters live inside it. Owns the live element
  * refs that the goo measures each frame.
  */
-export default function Canvas({ active, gen, myPosts, panX, panY, onOpen, onAddClick, onPanStart }: Props) {
+export default function Canvas({ active, gen, myPosts, panX, panY, seen, onOpen, onAddClick, onPanStart }: Props) {
   const visibleMy = myPosts.filter((p) => p.circle === active)
   const canvasRef = useRef<HTMLDivElement>(null)
   const worldRef = useRef<HTMLDivElement>(null)
@@ -129,13 +130,14 @@ export default function Canvas({ active, gen, myPosts, panX, panY, onOpen, onAdd
               rim={a.rim}
               rim2={a.rim2}
               avatarTarget={a.target}
+              seen={seen.has(p.id)}
               onOpen={onOpen}
               register={register}
             />
           )),
         )}
         {visibleMy.map((p, i) => (
-          <Bubble key={p.id} kind="mypost" data={p} index={i} onOpen={onOpen} register={registerMy} />
+          <Bubble key={p.id} kind="mypost" data={p} index={i} seen={seen.has(p.id)} onOpen={onOpen} register={registerMy} />
         ))}
       </motion.div>
     </div>

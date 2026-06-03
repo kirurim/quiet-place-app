@@ -38,14 +38,16 @@ npm run preview  # preview the production build
   Switching a circle **re-centers** the canvas (the "+" animates back to center).
 - **Fountain**: selecting a circle erupts its content from the active pill in a
   two-level structure —
-  1. **Avatars** (people) fly out and scatter with **no-overlap placement**
-     (reach-based rejection sampling, clear of the center).
+  1. **Avatars** (people) fly out to a **ring around the center** — clusters are
+     spaced evenly so they never overlap, yet stay close enough to **peek into the
+     viewport** (it reads as "something flew out", never an empty center).
   2. Each avatar **unfolds** from 30 → 48px.
   3. Each avatar's **posts** grow out, evenly spaced by angle — a little
      **hub-and-spoke** cluster.
 - **Post size by age** (clamp 40–120): `<2d → 120`, `2–5d → 78`, `5–7d → 40`.
-- A rotating **lime dashed ring** marks the **fresh posts you just created** via
-  the "+" (not avatars).
+- A rotating **lime dashed "new" ring** marks fresh posts — the ones you created
+  via the "+" and the fresh seeded ones (age < 2d). The ring **disappears once you
+  open the post** (marked seen).
 - **Metaball goo**: a dark goo layer renders *behind* the glass bubbles —
   **one small filtered group per cluster** (avatar + its posts, and the "+" + your
   posts), fused by an SVG blur+threshold filter so only the organic "necks" show.

@@ -128,32 +128,21 @@ interface Spec {
 }
 
 /**
- * Place each cluster's center with rejection sampling so no two clusters (nor
- * the center "+" and its posts) overlap: dist(a,b) > reachA + reachB + gap.
+ * Place clusters evenly on a ring around the "+". The ring radius is sized so no
+ * two clusters touch (from their reach), but kept tight enough that clusters peek
+ * into the viewport — it must read as "something flew out", never empty.
  */
 function placeCircles(specs: Spec[]): void {
-  const GAP = 18
-  const placed: Spec[] = []
-  for (const p of specs) {
-    let best: { x: number; y: number } | null = null
-    for (let t = 0; t < 2000; t++) {
-      const x = HC.x + (rand() - 0.5) * 760
-      const y = HC.y + (rand() - 0.5) * 940
-      if (Math.hypot(x - HC.x, y - HC.y) < p.reach + 195) continue // clear of the "+"
-      if (placed.every((q) => Math.hypot(q.px - x, q.py - y) > q.reach + p.reach + GAP)) {
-        best = { x, y }
-        break
-      }
-    }
-    if (!best) {
-      const a = placed.length * 1.7
-      const rr = 300 + placed.length * 40
-      best = { x: HC.x + Math.cos(a) * rr, y: HC.y + Math.sin(a) * rr }
-    }
-    p.px = best.x
-    p.py = best.y
-    placed.push(p)
-  }
+  const N = specs.length
+  const GAP = 48
+  const maxReach = Math.max(...specs.map((s) => s.reach))
+  const ringR = Math.max(210, (2 * maxReach + GAP) / (2 * Math.sin(Math.PI / N)))
+  specs.forEach((s, i) => {
+    const ang = -Math.PI / 2 + i * ((2 * Math.PI) / N) + (rand() - 0.5) * 0.2 // angular jitter
+    const rr = ringR + (rand() - 0.5) * 28 // radial jitter
+    s.px = HC.x + Math.cos(ang) * rr
+    s.py = HC.y + Math.sin(ang) * rr
+  })
 }
 
 /**

@@ -256,6 +256,18 @@ body {
 .bubble.old {
   opacity: 0.72;
 }
+
+/* hidden scrollbars (comment list + self-profile body) */
+.v-list,
+.profile.self .p-body {
+  scrollbar-width: none;
+}
+.v-list::-webkit-scrollbar,
+.profile.self .p-body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
 @keyframes drift {
   0%,
   100% {
@@ -316,7 +328,7 @@ body {
   position: absolute;
   inset: -2px;
   z-index: 80;
-  border-radius: 50px;
+  border-radius: 0;
   overflow: hidden;
   background: #000;
 }
@@ -561,7 +573,7 @@ body {
   position: absolute;
   inset: -2px;
   z-index: 90;
-  border-radius: 50px;
+  border-radius: 0;
   overflow: hidden;
   background: #000;
 }
@@ -772,7 +784,7 @@ body {
   position: absolute;
   inset: -2px;
   z-index: 95;
-  border-radius: 50px;
+  border-radius: 0;
   overflow: hidden;
   background: #000;
 }

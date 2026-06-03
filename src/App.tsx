@@ -16,9 +16,16 @@ export default function App() {
   const [myPosts, setMyPosts] = useState<MyPost[]>([])
 
   const [openPost, setOpenPost] = useState<Viewable | null>(null)
+  const [seen, setSeen] = useState<Set<string>>(new Set())
   const [profile, setProfile] = useState<ProfileTarget>(null)
   const [cameraOpen, setCameraOpen] = useState(false)
   const [pendingSeed, setPendingSeed] = useState(900)
+
+  // Open a post and mark it seen (drops its "new" dashed ring).
+  const openViewer = (v: Viewable) => {
+    setOpenPost(v)
+    setSeen((s) => (s.has(v.id) ? s : new Set(s).add(v.id)))
+  }
 
   // Pan lives here so the share handler can freeze a post's fountain origin and
   // the re-center animation can drive it on circle switch.
@@ -69,7 +76,8 @@ export default function App() {
         myPosts={myPosts}
         panX={panX}
         panY={panY}
-        onOpen={setOpenPost}
+        seen={seen}
+        onOpen={openViewer}
         onAddClick={openCamera}
         onPanStart={stopRecenter}
       />

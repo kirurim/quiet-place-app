@@ -17,7 +17,7 @@ const fmtAge = (a: number) => (a < 1 ? `${Math.max(1, Math.round(a * 24))}h` : `
 interface Props {
   post: Viewable | null
   onClose: () => void
-  onOpenProfile: (seed: number) => void
+  onOpenProfile: (seed: number, name: string) => void
 }
 
 /**
@@ -32,8 +32,8 @@ export default function PostViewer({ post, onClose, onOpenProfile }: Props) {
   )
 }
 
-function Sheet({ post, onClose, onOpenProfile }: { post: Viewable; onClose: () => void; onOpenProfile: (seed: number) => void }) {
-  const { seed, age, caption } = post
+function Sheet({ post, onClose, onOpenProfile }: { post: Viewable; onClose: () => void; onOpenProfile: (seed: number, name: string) => void }) {
+  const { seed, age, caption, author } = post
   const [, bump] = useReducer((x) => x + 1, 0)
   const [draft, setDraft] = useState('')
   const [expanded, setExpanded] = useState(false)
@@ -45,12 +45,12 @@ function Sheet({ post, onClose, onOpenProfile }: { post: Viewable; onClose: () =
   const meta = useMemo(() => {
     const bars = Array.from({ length: 20 }, (_, i) => 4 + ((seed * 3 + i * 7) % 14))
     return {
-      src: `https://picsum.photos/seed/${seed}/280/280`,
-      name: NAMES[seed % NAMES.length],
+      src: `https://picsum.photos/seed/${seed}/900/1300`,
+      name: author,
       time: fmtAge(age),
       voice: { who: NAMES[(seed + 5) % NAMES.length], avatar: seed + 30, bars, dur: `0:0${1 + (seed % 9)}` },
     }
-  }, [seed, age])
+  }, [seed, age, author])
 
   const comments = getComments(seed)
   const openSet = getOpenReplies(seed)
@@ -108,8 +108,8 @@ function Sheet({ post, onClose, onOpenProfile }: { post: Viewable; onClose: () =
       <div className="v-scrim" />
 
       <div className="v-top">
-        <img className="v-ava" src={`https://picsum.photos/seed/${seed}/60/60`} alt="" onClick={() => onOpenProfile(seed)} />
-        <span className="v-name" onClick={() => onOpenProfile(seed)}>
+        <img className="v-ava" src={`https://picsum.photos/seed/${seed}/60/60`} alt="" onClick={() => onOpenProfile(seed, author)} />
+        <span className="v-name" onClick={() => onOpenProfile(seed, author)}>
           {meta.name}
         </span>
         <span className="v-time">{meta.time}</span>

@@ -40,7 +40,9 @@ npm run preview  # preview the production build
   two-level structure —
   1. **Avatars** (people) fly out to a **ring around the center** — clusters are
      spaced evenly so they never overlap, yet stay close enough to **peek into the
-     viewport** (it reads as "something flew out", never an empty center).
+     viewport** (it reads as "something flew out", never an empty center). Each
+     avatar is an **initials monogram** (Google-style dark-glass circle, e.g.
+     "Sage Savani" → "SS"), not a photo.
   2. Each avatar **unfolds** from 30 → 48px.
   3. Each avatar's **posts** grow out, evenly spaced by angle — a little
      **hub-and-spoke** cluster.
@@ -79,13 +81,15 @@ Comments and replies persist if you reopen the post. Tap the author → Profile.
 
 ## Profile
 
-Slides up Apple-Invites style (no bio, no divider lines). **Person** (tap an
-author): photo fading into a circle-tinted gradient, Inter-900 name, and a
-Family / Friends / Remove segment (lime active). **You** (tap the gear): a
-scrollable profile with a refined Family/Friends segment, a **member list**
-(each with a Remove pill, plus an **add-row** — placeholder avatar + "Add someone"
-+ green Add), and a **Settings** section (Notifications toggle, Log out, Delete
-account in red with chevrons).
+Slides up (no bio, no divider lines). **Person** (tap an author): a hi-res photo
+fading into a circle-tinted gradient, Inter-900 name, and a Family / Friends /
+Remove segment (lime active). **You / Settings** (tap the gear): a solid dark,
+scrollable screen — **no photo or avatar**. An **editable full name** (Inter-900
+with a plain pencil; tap to edit, lime focus ring, Enter/blur saves), a
+Family / Friends switch made of **two dock-style pills**, a **member list** (each
+a small initials monogram + full name + Remove pill) with an **add-row**
+(placeholder avatar + solid plus + "Add someone" + green Add), and a **Settings**
+section (Notifications toggle, Log out, Delete account in red with chevrons).
 
 ## Camera
 

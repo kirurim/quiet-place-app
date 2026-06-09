@@ -1,8 +1,9 @@
 // Comment store for the post viewer. A nested (one level) tree kept in a
 // module-level Map keyed by post seed, so appends + reply-toggle state survive
 // the viewer remounting when you reopen a post.
+import { NAMES } from './model'
 
-export const NAMES = ['mishka', 'kalindi', 'hak1883', 'noa', 'leo.r', 'sonya', 'theo', 'dasha']
+export { NAMES }
 export const REACTS = [
   'so warm 🤍',
   'miss you all',

@@ -37,7 +37,7 @@ function Flow({ seed, active, onShare, onClose }: { seed: number; active: Circle
     >
       {stage === 'view' ? (
         <>
-          <img className="v-photo" src={`https://picsum.photos/seed/${seed}/600/900`} alt="" />
+          <img className="v-photo" src={`https://picsum.photos/seed/${seed}/900/1300`} alt="" />
           <div className="v-scrim" />
           <div className="cam-top">
             <button className="v-x" style={{ marginLeft: 0 }} onClick={onClose} aria-label="Close">
@@ -53,7 +53,7 @@ function Flow({ seed, active, onShare, onClose }: { seed: number; active: Circle
         </>
       ) : (
         <>
-          <img className="v-photo" src={`https://picsum.photos/seed/${seed}/600/900`} alt="" />
+          <img className="v-photo" src={`https://picsum.photos/seed/${seed}/900/1300`} alt="" />
           <div className="v-scrim" />
           <div className="cam-top">
             <button className="v-x" style={{ marginLeft: 0 }} onClick={() => setStage('view')} aria-label="Back">

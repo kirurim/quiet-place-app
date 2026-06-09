@@ -20,6 +20,7 @@ export default function App() {
   const [profile, setProfile] = useState<ProfileTarget>(null)
   const [cameraOpen, setCameraOpen] = useState(false)
   const [pendingSeed, setPendingSeed] = useState(900)
+  const [myName, setMyName] = useState('Mia Larsen')
 
   // Open a post and mark it seen (drops its "new" dashed ring).
   const openViewer = (v: Viewable) => {
@@ -77,6 +78,7 @@ export default function App() {
         panX={panX}
         panY={panY}
         seen={seen}
+        overlayOpen={openPost !== null || profile !== null || cameraOpen}
         onOpen={openViewer}
         onAddClick={openCamera}
         onPanStart={stopRecenter}
@@ -88,8 +90,8 @@ export default function App() {
         ))}
       </div>
 
-      <PostViewer post={openPost} onClose={() => setOpenPost(null)} onOpenProfile={(seed) => setProfile({ kind: 'person', seed })} />
-      <Profile target={profile} active={active} onClose={() => setProfile(null)} />
+      <PostViewer post={openPost} onClose={() => setOpenPost(null)} onOpenProfile={(seed, name) => setProfile({ kind: 'person', seed, name })} />
+      <Profile target={profile} active={active} myName={myName} onRename={setMyName} onClose={() => setProfile(null)} />
       <Camera open={cameraOpen} seed={pendingSeed} active={active} onShare={share} onClose={() => setCameraOpen(false)} />
     </IPhoneFrame>
   )

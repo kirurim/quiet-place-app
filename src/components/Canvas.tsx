@@ -21,6 +21,7 @@ interface Props {
   panX: MotionValue<number>
   panY: MotionValue<number>
   seen: Set<string>
+  overlayOpen: boolean
   onOpen: (post: Viewable) => void
   onAddClick: () => void
   onPanStart: () => void
@@ -31,7 +32,7 @@ interface Props {
  * the center "+", goo and bubble clusters live inside it. Owns the live element
  * refs that the goo measures each frame.
  */
-export default function Canvas({ active, gen, myPosts, panX, panY, seen, onOpen, onAddClick, onPanStart }: Props) {
+export default function Canvas({ active, gen, myPosts, panX, panY, seen, overlayOpen, onOpen, onAddClick, onPanStart }: Props) {
   const visibleMy = myPosts.filter((p) => p.circle === active)
   const canvasRef = useRef<HTMLDivElement>(null)
   const worldRef = useRef<HTMLDivElement>(null)
@@ -99,6 +100,7 @@ export default function Canvas({ active, gen, myPosts, panX, panY, seen, onOpen,
     <div
       className="canvas"
       ref={canvasRef}
+      style={{ visibility: overlayOpen ? 'hidden' : 'visible' }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}

@@ -71,11 +71,31 @@ export const CAPS = [
   'golden hour',
 ]
 
+// Full names — drive the initials monogram on avatars and author labels.
+export const NAMES = [
+  'Sage Savani',
+  'Edward Michaels',
+  'Warren Lo',
+  'Eli Bauer',
+  'Suzie Webb',
+  'Georges Hilarii',
+  'Steeve Gass',
+  'Antonia Ross',
+]
+
+/** Two-initial monogram from a full name (first + last initial). */
+export function initials(name: string): string {
+  const p = name.trim().split(/\s+/)
+  return ((p[0][0] || '') + (p[1] ? p[1][0] : p[0][1] || '')).toUpperCase()
+}
+
 export interface PostModel {
   id: string
   seed: number
   age: number
   size: number
+  /** full name of the person who posted (the avatar's name) */
+  author: string
   /** optional caption — rendered as the first/main comment in the viewer */
   caption: string
   /** resting target in world coords */
@@ -86,6 +106,7 @@ export interface PostModel {
 export interface AvatarModel {
   id: string
   seed: number
+  name: string // full name → initials monogram
   rim: string
   rim2: string
   fresh: boolean // has a post < 2 days → gets the lime dashed ring
@@ -134,12 +155,12 @@ interface Spec {
  */
 function placeCircles(specs: Spec[]): void {
   const N = specs.length
-  const GAP = 48
+  const GAP = 30
   const maxReach = Math.max(...specs.map((s) => s.reach))
-  const ringR = Math.max(210, (2 * maxReach + GAP) / (2 * Math.sin(Math.PI / N)))
+  const ringR = Math.max(200, (2 * maxReach + GAP) / (2 * Math.sin(Math.PI / N)))
   specs.forEach((s, i) => {
-    const ang = -Math.PI / 2 + i * ((2 * Math.PI) / N) + (rand() - 0.5) * 0.2 // angular jitter
-    const rr = ringR + (rand() - 0.5) * 28 // radial jitter
+    const ang = -Math.PI / 2 + i * ((2 * Math.PI) / N) + (rand() - 0.5) * 0.12 // angular jitter
+    const rr = ringR + (rand() - 0.5) * 14 // radial jitter
     s.px = HC.x + Math.cos(ang) * rr
     s.py = HC.y + Math.sin(ang) * rr
   })
@@ -178,25 +199,31 @@ export function buildCluster(
   placeCircles(specs)
 
   // 3. resolve final targets
-  const avatars: AvatarModel[] = specs.map((s) => ({
-    id: `${circleId}-${gen}-a${s.i}`,
-    seed: c.seedBase + 500 + s.i * 11,
-    rim: c.rims[s.i % 2],
-    rim2: c.rims[(s.i + 1) % 2],
-    fresh: s.posts.some((ph) => ph.age < 2),
-    target: { x: s.px, y: s.py },
-    flyDelay: s.flyDelay,
-    unfoldDelay: s.unfoldDelay,
-    posts: s.posts.map((ph, j) => ({
-      id: `${circleId}-${gen}-a${s.i}-p${j}`,
-      seed: ph.seed,
-      age: ph.age,
-      size: ph.size,
-      caption: ph.seed % 2 === 0 ? CAPS[ph.seed % CAPS.length] : '',
-      target: { x: s.px + Math.cos(ph.ang) * ph.r, y: s.py + Math.sin(ph.ang) * ph.r },
-      growDelay: ph.growDelay,
-    })),
-  }))
+  const avatars: AvatarModel[] = specs.map((s) => {
+    const avatarSeed = c.seedBase + 500 + s.i * 11
+    const name = NAMES[avatarSeed % NAMES.length]
+    return {
+      id: `${circleId}-${gen}-a${s.i}`,
+      seed: avatarSeed,
+      name,
+      rim: c.rims[s.i % 2],
+      rim2: c.rims[(s.i + 1) % 2],
+      fresh: s.posts.some((ph) => ph.age < 2),
+      target: { x: s.px, y: s.py },
+      flyDelay: s.flyDelay,
+      unfoldDelay: s.unfoldDelay,
+      posts: s.posts.map((ph, j) => ({
+        id: `${circleId}-${gen}-a${s.i}-p${j}`,
+        seed: ph.seed,
+        age: ph.age,
+        size: ph.size,
+        author: name,
+        caption: ph.seed % 2 === 0 ? CAPS[ph.seed % CAPS.length] : '',
+        target: { x: s.px + Math.cos(ph.ang) * ph.r, y: s.py + Math.sin(ph.ang) * ph.r },
+        growDelay: ph.growDelay,
+      })),
+    }
+  })
 
   return { circleId, origin, avatars, settleMs: settleMs + 900 }
 }

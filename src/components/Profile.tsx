@@ -1,20 +1,21 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useReducer, useState } from 'react'
-import { NAMES } from '../lib/comments'
+import { useReducer, useRef, useState } from 'react'
 import { addMember, listMembers, removeMember } from '../lib/members'
-import { CIRCLES, type CircleKey } from '../lib/model'
-import { Chevron, Close, Plus } from './IconSet'
+import { CIRCLES, initials, type CircleKey } from '../lib/model'
+import { Chevron, Close, Edit, Plus } from './IconSet'
 
-export type ProfileTarget = { kind: 'person'; seed: number } | { kind: 'self' } | null
+export type ProfileTarget = { kind: 'person'; seed: number; name: string } | { kind: 'self' } | null
 
 interface Props {
   target: ProfileTarget
   active: CircleKey
+  myName: string
+  onRename: (name: string) => void
   onClose: () => void
 }
 
-/** Person profile (tap author) or your own profile (tap the gear). Slides up. */
-export default function Profile({ target, active, onClose }: Props) {
+/** Person profile (tap author) or your own profile / settings (tap the gear). */
+export default function Profile({ target, active, myName, onRename, onClose }: Props) {
   return (
     <AnimatePresence>
       {target && (
@@ -26,7 +27,11 @@ export default function Profile({ target, active, onClose }: Props) {
           exit={{ y: '100%' }}
           transition={{ type: 'spring', stiffness: 320, damping: 34 }}
         >
-          {target.kind === 'self' ? <Self active={active} onClose={onClose} /> : <Person seed={target.seed} active={active} onClose={onClose} />}
+          {target.kind === 'self' ? (
+            <Self active={active} myName={myName} onRename={onRename} onClose={onClose} />
+          ) : (
+            <Person seed={target.seed} name={target.name} active={active} onClose={onClose} />
+          )}
         </motion.div>
       )}
     </AnimatePresence>
@@ -43,10 +48,9 @@ function CloseBtn({ onClose }: { onClose: () => void }) {
   )
 }
 
-function Person({ seed, active, onClose }: { seed: number; active: CircleKey; onClose: () => void }) {
+function Person({ seed, name, active, onClose }: { seed: number; name: string; active: CircleKey; onClose: () => void }) {
   const [seg, setSeg] = useState<string>(active)
   const tint = CIRCLES[active].rims[0]
-  const name = NAMES[seed % NAMES.length]
   const SEGS = [
     { key: 'fam', label: 'Family' },
     { key: 'fr', label: 'Friends' },
@@ -54,7 +58,7 @@ function Person({ seed, active, onClose }: { seed: number; active: CircleKey; on
   ]
   return (
     <>
-      <img className="p-photo" src={`https://picsum.photos/seed/${seed}/600/900`} alt="" />
+      <img className="p-photo" src={`https://picsum.photos/seed/${seed}/900/1300`} alt="" />
       <div className="p-grad" style={{ background: `linear-gradient(180deg,transparent 30%,${tint}33 56%,#0c0c0e 82%)` }} />
       <CloseBtn onClose={onClose} />
       <div className="p-body">
@@ -72,22 +76,46 @@ function Person({ seed, active, onClose }: { seed: number; active: CircleKey; on
   )
 }
 
-function Self({ active, onClose }: { active: CircleKey; onClose: () => void }) {
+function Self({ active, myName, onRename, onClose }: { active: CircleKey; myName: string; onRename: (n: string) => void; onClose: () => void }) {
   const [, bump] = useReducer((x) => x + 1, 0)
   const [seg, setSeg] = useState<CircleKey>(active)
   const [notif, setNotif] = useState(true)
+  const [val, setVal] = useState(myName)
+  const nameRef = useRef<HTMLInputElement>(null)
+
+  const commit = () => {
+    const n = val.trim() || myName
+    setVal(n)
+    onRename(n)
+  }
+  const editName = () => {
+    nameRef.current?.focus()
+    nameRef.current?.select()
+  }
+
   const SEGS: { key: CircleKey; label: string }[] = [
     { key: 'fam', label: 'Family' },
     { key: 'fr', label: 'Friends' },
   ]
+
   return (
     <>
-      <img className="p-photo" src="https://picsum.photos/seed/7/600/700" alt="" />
-      <div className="p-grad" />
       <CloseBtn onClose={onClose} />
       <div className="p-body">
-        <h2 className="p-name">You</h2>
-        <div className="p-meta">your quiet space</div>
+        <div className="p-name-row">
+          <input
+            ref={nameRef}
+            className="p-name p-name-edit"
+            value={val}
+            spellCheck={false}
+            onChange={(e) => setVal(e.target.value)}
+            onBlur={commit}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), nameRef.current?.blur())}
+          />
+          <span className="p-edit" onClick={editName} aria-label="Edit name">
+            <Edit />
+          </span>
+        </div>
 
         <div className="p-seg">
           {SEGS.map((s) => (
@@ -99,17 +127,17 @@ function Self({ active, onClose }: { active: CircleKey; onClose: () => void }) {
 
         <div>
           {listMembers(seg).map((m) => (
-            <div className="mrow" key={m.seed}>
-              <img src={`https://picsum.photos/seed/${m.seed}/80/80`} alt="" />
+            <div className="mrow" key={m.id}>
+              <div className="mmono">{initials(m.name)}</div>
               <span className="mn">{m.name}</span>
-              <button className="rm" onClick={() => { removeMember(seg, m.seed); bump() }}>
+              <button className="rm" onClick={() => { removeMember(seg, m.id); bump() }}>
                 Remove
               </button>
             </div>
           ))}
           <div className="mrow" onClick={() => { addMember(seg); bump() }}>
             <div className="mav">
-              <Plus size={18} />
+              <Plus size={20} />
             </div>
             <span className="mn dim">Add someone</span>
             <button className="rm add">Add</button>

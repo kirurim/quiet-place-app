@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { AVATAR, myPostTarget, type AvatarModel, type MyPost, type PostModel } from '../lib/model'
+import { AVATAR, initials, myPostTarget, NAMES, type AvatarModel, type MyPost, type PostModel } from '../lib/model'
 
 export interface Viewable {
   id: string
   seed: number
   age: number
+  author: string
   caption: string
 }
 
@@ -101,8 +102,10 @@ export default function Bubble(props: Props) {
         }
 
   const open = () => {
-    if (props.kind === 'post') props.onOpen({ id: props.data.id, seed: props.data.seed, age: props.data.age, caption: props.data.caption })
-    else if (props.kind === 'mypost') props.onOpen({ id: props.data.id, seed: props.data.seed, age: 0, caption: props.data.caption })
+    if (props.kind === 'post')
+      props.onOpen({ id: props.data.id, seed: props.data.seed, age: props.data.age, author: props.data.author, caption: props.data.caption })
+    else if (props.kind === 'mypost')
+      props.onOpen({ id: props.data.id, seed: props.data.seed, age: 0, author: NAMES[props.data.seed % NAMES.length], caption: props.data.caption })
   }
 
   return (
@@ -120,7 +123,9 @@ export default function Bubble(props: Props) {
     >
       <div className="bubble-float" style={{ ['--dur' as string]: `${(6 + (seed % 5)).toFixed(1)}s` }}>
         <div className="glass" ref={(el) => props.register(props.data.id, el)} style={{ ['--rim' as string]: rim, ['--rim2' as string]: rim2 }}>
-          {imgOk ? (
+          {isAvatar ? (
+            <span className="mono">{initials(props.data.name)}</span>
+          ) : imgOk ? (
             <img
               src={`https://picsum.photos/seed/${seed}/280/280`}
               alt=""

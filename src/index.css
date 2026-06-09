@@ -417,7 +417,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  top: auto;
+  top: 63%; /* concrete in BOTH states so top can animate % → % (no jump) */
   z-index: 3;
   display: flex;
   flex-direction: column;
@@ -425,10 +425,10 @@ body {
   border-radius: 26px 26px 0 0;
   background: linear-gradient(180deg, rgba(20, 20, 24, 0), rgba(13, 13, 16, 0.92) 12%);
   backdrop-filter: blur(8px);
-  transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s;
+  transition: top 0.62s cubic-bezier(0.22, 1, 0.3, 1), background 0.5s ease;
 }
 .v-sheet.expanded {
-  top: 17%;
+  top: 14%;
   background: rgba(12, 12, 14, 0.97);
 }
 .v-grip {
@@ -441,15 +441,12 @@ body {
   flex: 0 0 auto;
   touch-action: none;
 }
+/* list fills the sheet at every position, in both states */
 .v-list {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  max-height: 166px;
-}
-.v-sheet.expanded .v-list {
   flex: 1;
   min-height: 0;
-  max-height: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .cmt {
   display: flex;

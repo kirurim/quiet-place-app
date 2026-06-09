@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useReducer, useRef, useState } from 'react'
+import { useReducer, useState } from 'react'
 import { addMember, listMembers, removeMember } from '../lib/members'
 import { CIRCLES, initials, type CircleKey } from '../lib/model'
-import { Chevron, Close, Edit, Plus } from './IconSet'
+import { Chevron, Close, Plus } from './IconSet'
 
 export type ProfileTarget = { kind: 'person'; seed: number; name: string } | { kind: 'self' } | null
 
@@ -81,16 +81,11 @@ function Self({ active, myName, onRename, onClose }: { active: CircleKey; myName
   const [seg, setSeg] = useState<CircleKey>(active)
   const [notif, setNotif] = useState(true)
   const [val, setVal] = useState(myName)
-  const nameRef = useRef<HTMLInputElement>(null)
 
   const commit = () => {
     const n = val.trim() || myName
     setVal(n)
     onRename(n)
-  }
-  const editName = () => {
-    nameRef.current?.focus()
-    nameRef.current?.select()
   }
 
   const SEGS: { key: CircleKey; label: string }[] = [
@@ -104,17 +99,18 @@ function Self({ active, myName, onRename, onClose }: { active: CircleKey; myName
       <div className="p-body">
         <div className="p-name-row">
           <input
-            ref={nameRef}
             className="p-name p-name-edit"
             value={val}
             spellCheck={false}
             onChange={(e) => setVal(e.target.value)}
             onBlur={commit}
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), nameRef.current?.blur())}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                e.currentTarget.blur()
+              }
+            }}
           />
-          <span className="p-edit" onClick={editName} aria-label="Edit name">
-            <Edit />
-          </span>
         </div>
 
         <div className="p-seg">

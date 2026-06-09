@@ -40,14 +40,19 @@ interface MyPostProps extends Common {
 
 type Props = AvatarProps | PostProps | MyPostProps
 
-const stop = (e: React.PointerEvent) => e.stopPropagation()
-
 const MY_RIMS = { rim: '#e8ff3a', rim2: '#b6ff8a' }
+
+// Shared across all bubbles: timestamp of the most recent drag movement. Any
+// open is blocked for 350ms after a drag — a hard double-guard so a drag can
+// never open a post.
+let dragLock = 0
 
 /**
  * A liquid-glass bubble — a person avatar, one of their posts, or one of your
- * own posts orbiting the "+". Erupts from a fountain origin with spring physics,
- * drifts, is draggable; posts open the viewer on tap (Framer arbitrates tap vs drag).
+ * own posts orbiting the "+". Erupts from a fountain origin (Framer spring),
+ * drifts, and is draggable. Drag is hand-rolled with window-level pointer
+ * listeners (NO setPointerCapture, which drops moves on touch): it follows the
+ * pointer 1:1 via `left/top`, and a post opens ONLY on a clean quick tap.
  */
 export default function Bubble(props: Props) {
   const [imgOk, setImgOk] = useState(true)
@@ -57,11 +62,13 @@ export default function Bubble(props: Props) {
 
   const size = isAvatar ? AVATAR : isMine ? 120 : props.data.size
   const target = isMine ? myPostTarget(props.index) : props.data.target
-  const left = target.x - size / 2
-  const top = target.y - size / 2
 
-  // fountain offset: avatars fly from the pill origin, posts grow out of their
-  // avatar, my posts erupt from their frozen origin (the pill at share time).
+  // live position (left/top of the bubble); drag mutates this 1:1
+  const [pos, setPos] = useState(() => ({ x: target.x - size / 2, y: target.y - size / 2 }))
+
+  // fountain offset (a Framer transform on top of the resting left/top): avatars
+  // fly from the pill origin, posts grow out of their avatar, my posts from their
+  // frozen origin. Relative to the resting target, not the live pos.
   const from = isAvatar ? props.origin : isMine ? props.data.origin : props.avatarTarget
   const offX = from.x - target.x
   const offY = from.y - target.y
@@ -102,21 +109,48 @@ export default function Bubble(props: Props) {
         }
 
   const open = () => {
+    if (Date.now() - dragLock < 350) return // a drag just happened — never open
     if (props.kind === 'post')
       props.onOpen({ id: props.data.id, seed: props.data.seed, age: props.data.age, author: props.data.author, caption: props.data.caption })
     else if (props.kind === 'mypost')
       props.onOpen({ id: props.data.id, seed: props.data.seed, age: 0, author: NAMES[props.data.seed % NAMES.length], caption: props.data.caption })
   }
 
+  const onPointerDown = (e: React.PointerEvent) => {
+    e.stopPropagation() // so the canvas doesn't pan
+    const sx = e.clientX
+    const sy = e.clientY
+    const ox = pos.x
+    const oy = pos.y
+    const t0 = Date.now()
+    let moved = false
+
+    const move = (ev: PointerEvent) => {
+      const dx = ev.clientX - sx
+      const dy = ev.clientY - sy
+      if (!moved && Math.hypot(dx, dy) > 3) moved = true
+      if (moved) {
+        dragLock = Date.now()
+        setPos({ x: ox + dx, y: oy + dy })
+      }
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
+      if (!moved && Date.now() - t0 < 300) open() // clean quick tap only
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
+  }
+
   return (
     <motion.div
       className={className}
-      style={{ left, top, width: size, height: size }}
-      drag
-      dragMomentum={false}
-      dragElastic={0}
-      onPointerDown={stop}
-      onTap={open}
+      style={{ left: pos.x, top: pos.y, width: size, height: size }}
+      onPointerDown={onPointerDown}
+      onClick={(e) => e.stopPropagation()}
       initial={{ x: offX, y: offY, scale: 0, opacity: 0 }}
       animate={{ x: 0, y: 0, scale: 1, opacity: 1 }}
       transition={transition}

@@ -9,8 +9,11 @@ import {
   toggleReplies,
   type Comment,
 } from '../lib/comments'
+import Avatar from './Avatar'
 import type { Viewable } from './Bubble'
 import { Close, Mic, Play, Send } from './IconSet'
+
+const photoOf = (avatar: number) => `https://picsum.photos/seed/${avatar}/60/60`
 
 const fmtAge = (a: number) => (a < 1 ? `${Math.max(1, Math.round(a * 24))}h` : `${Math.round(a)}d`)
 
@@ -108,7 +111,7 @@ function Sheet({ post, onClose, onOpenProfile }: { post: Viewable; onClose: () =
       <div className="v-scrim" />
 
       <div className="v-top">
-        <img className="v-ava" src={`https://picsum.photos/seed/${seed}/60/60`} alt="" onClick={() => onOpenProfile(seed, author)} />
+        <Avatar className="v-ava" name={author} photo={photoOf(seed)} onClick={() => onOpenProfile(seed, author)} />
         <span className="v-name" onClick={() => onOpenProfile(seed, author)}>
           {meta.name}
         </span>
@@ -124,7 +127,7 @@ function Sheet({ post, onClose, onOpenProfile }: { post: Viewable; onClose: () =
         <div className="v-list" ref={listRef}>
           {caption && (
             <div className="cmt main">
-              <img className="cmt-av" src={`https://picsum.photos/seed/${seed}/60/60`} alt="" />
+              <Avatar className="cmt-av" name={meta.name} photo={photoOf(seed)} />
               <div className="cmt-body">
                 <div className="cmt-name">{meta.name}</div>
                 <div className="cmt-text">{caption}</div>
@@ -132,7 +135,7 @@ function Sheet({ post, onClose, onOpenProfile }: { post: Viewable; onClose: () =
             </div>
           )}
           <div className="cmt">
-            <img className="cmt-av" src={`https://picsum.photos/seed/${meta.voice.avatar}/60/60`} alt="" />
+            <Avatar className="cmt-av" name={meta.voice.who} photo={photoOf(meta.voice.avatar)} />
             <div className="cmt-body">
               <div className="cmt-name">{meta.voice.who}</div>
               <div className="cmt-voice">
@@ -186,7 +189,7 @@ function Sheet({ post, onClose, onOpenProfile }: { post: Viewable; onClose: () =
 function CommentRow({ c, open, onReply, onToggle }: { c: Comment; open: boolean; onReply: (id: string, who: string) => void; onToggle: () => void }) {
   return (
     <div className="cmt">
-      <img className="cmt-av" src={`https://picsum.photos/seed/${c.avatar}/60/60`} alt="" />
+      <Avatar className="cmt-av" name={c.who} photo={c.mine ? undefined : photoOf(c.avatar)} />
       <div className="cmt-body">
         <div className="cmt-name">{c.who}</div>
         <div className="cmt-text">{c.text}</div>
@@ -204,7 +207,7 @@ function CommentRow({ c, open, onReply, onToggle }: { c: Comment; open: boolean;
             {open &&
               c.replies.map((r) => (
                 <div className="cmt-reply" key={r.id}>
-                  <img className="cmt-av" src={`https://picsum.photos/seed/${r.avatar}/60/60`} alt="" />
+                  <Avatar className="cmt-av" name={r.who} photo={r.mine ? undefined : photoOf(r.avatar)} />
                   <div className="cmt-body">
                     <div className="cmt-name">{r.who}</div>
                     <div className="cmt-text">{r.text}</div>

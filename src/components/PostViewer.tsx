@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useMemo, useReducer, useRef, useState } from 'react'
 import {
   addComment,
   addReply,
@@ -98,56 +98,6 @@ function Sheet({ post, onClose, onOpenProfile }: { post: Viewable; onClose: () =
   const onGripUp = () => {
     if (!grip.current.moved) setExpanded((x) => !x)
   }
-
-  // Expand / collapse by scrolling or swiping the comment list itself.
-  useEffect(() => {
-    const list = listRef.current
-    if (!list) return
-
-    const onWheel = (e: WheelEvent) => {
-      if (!expanded && e.deltaY > 0) {
-        setExpanded(true)
-        e.preventDefault()
-      } else if (expanded && e.deltaY < 0 && list.scrollTop <= 0) {
-        setExpanded(false)
-        e.preventDefault()
-      }
-    }
-
-    let startY = 0
-    let swiping = false
-    const onDown = (e: PointerEvent) => {
-      startY = e.clientY
-      swiping = true
-    }
-    const onMove = (e: PointerEvent) => {
-      if (!swiping) return
-      const dy = e.clientY - startY
-      if (!expanded && dy < -16) {
-        setExpanded(true)
-        swiping = false
-      } else if (expanded && dy > 16 && list.scrollTop <= 0) {
-        setExpanded(false)
-        swiping = false
-      }
-    }
-    const onUp = () => {
-      swiping = false
-    }
-
-    list.addEventListener('wheel', onWheel, { passive: false })
-    list.addEventListener('pointerdown', onDown)
-    list.addEventListener('pointermove', onMove)
-    list.addEventListener('pointerup', onUp)
-    list.addEventListener('pointercancel', onUp)
-    return () => {
-      list.removeEventListener('wheel', onWheel)
-      list.removeEventListener('pointerdown', onDown)
-      list.removeEventListener('pointermove', onMove)
-      list.removeEventListener('pointerup', onUp)
-      list.removeEventListener('pointercancel', onUp)
-    }
-  }, [expanded])
 
   return (
     <motion.div
